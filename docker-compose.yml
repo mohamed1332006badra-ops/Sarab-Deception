@@ -1,0 +1,10 @@
+version: '3.8'
+services:
+  app:
+    build: .
+    ports:
+      - "5000:5000"
+      - "2222:2222"
+      - "8080:8080"
+      - "5432:5432"
+    restart: always
