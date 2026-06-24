@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sarab – Deception-Based Cybersecurity Platform</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet" />
+  <style>
+    /* ── Reset & Root ─────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --black:      #000000;
+      --dark:       #050d14;
+      --dark2:      #0a1628;
+      --dark3:      #0d1f35;
+      --navy:       #0b2447;
+      --blue:       #1565c0;
+      --blue-lite:  #1976d2;
+      --neon:       #00ff41;
+      --neon-dim:   #00cc33;
+      --neon-glow:  rgba(0,255,65,0.18);
+      --neon-glow2: rgba(0,255,65,0.08);
+      --white:      #ffffff;
+      --gray:       #8899aa;
+      --gray2:      #aabbcc;
+      --slide-w:    1280px;
+      --slide-h:    720px;
+    }
+
+    html, body {
+      background: #111820;
+      font-family: 'Inter', sans-serif;
+      color: var(--white);
+    }
+
+    /* ── Slide Container ──────────────────────── */
+    .deck { display: flex; flex-direction: column; align-items: center; gap: 48px; padding: 48px 24px 80px; }
+
+    .slide {
+      width: var(--slide-w);
+      height: var(--slide-h);
+      background: var(--dark);
+      border: 1px solid rgba(0,255,65,0.15);
+      border-radius: 4px;
+      overflow: hidden;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 0 60px rgba(0,0,0,0.8), 0 0 0 1px rgba(0,255,65,0.05);
+    }
+
+    .slide::before {
+      content: attr(data-n) " / 10";
+      position: absolute;
+      top: 20px; right: 28px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: rgba(0,255,65,0.35);
+      letter-spacing: 0.08em;
+      z-index: 10;
+    }
+
+    .grid-bg {
+      position: absolute; inset: 0; z-index: 0;
+      background-image:
+        linear-gradient(rgba(0,255,65,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,255,65,0.03) 1px, transparent 1px);
+      background-size: 60px 60px;
+    }
+
+    .diag-line {
+      position: absolute; z-index: 1;
+      width: 2px; height: 140%;
+      background: linear-gradient(to bottom, transparent, rgba(0,255,65,0.12), transparent);
+      transform: rotate(25deg);
+      top: -20%; right: 22%;
+    }
+
+    .label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px; font-weight: 700;
+      letter-spacing: 0.18em; text-transform: uppercase;
+      color: var(--neon);
+    }
+    .eyebrow { margin-bottom: 12px; }
+
+    h1.main-title {
+      font-size: 72px; font-weight: 900; line-height: 1.0;
+      color: var(--white);
+      letter-spacing: -0.02em;
+    }
+    h1.main-title span.accent { color: var(--neon); }
+
+    h2.slide-title {
+      font-size: 40px; font-weight: 800; line-height: 1.1;
+      color: var(--white);
+      letter-spacing: -0.02em;
+    }
+    h2.slide-title span.accent { color: var(--neon); }
+
+    h3.section-title {
+      font-size: 26px; font-weight: 700;
+      color: var(--white);
+    }
+
+    p.body-text {
+      font-size: 16px; font-weight: 400; line-height: 1.65;
+      color: var(--gray2);
+    }
+    p.body-text strong { color: var(--white); font-weight: 600; }
+
+    .sub-text {
+      font-size: 13px; color: var(--gray);
+      line-height: 1.6;
+    }
+
+    .neon-hr {
+      width: 64px; height: 3px; border-radius: 2px;
+      background: var(--neon);
+      box-shadow: 0 0 12px var(--neon), 0 0 24px var(--neon-dim);
+      border: none;
+      margin: 18px 0;
+    }
+
+    .pill {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 5px 14px;
+      border: 1px solid rgba(0,255,65,0.4);
+      border-radius: 100px;
+      background: rgba(0,255,65,0.06);
+      font-size: 12px; font-weight: 600; color: var(--neon);
+      letter-spacing: 0.04em;
+    }
+    .pill .dot {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: var(--neon);
+      box-shadow: 0 0 8px var(--neon);
+      animation: blink 1.8s ease-in-out infinite;
+    }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+    .screenshot {
+      background: var(--dark3);
+      border: 1px dashed rgba(0,255,65,0.25);
+      border-radius: 8px;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 10px;
+      position: relative;
+      overflow: hidden;
+    }
+    .screenshot::after {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(135deg, rgba(0,255,65,0.03) 0%, transparent 60%);
+    }
+    .screenshot .ph-icon { font-size: 32px; opacity: 0.35; }
+    .screenshot .ph-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px; color: rgba(0,255,65,0.4);
+      letter-spacing: 0.12em;
+    }
+    .screenshot .chrome-bar {
+      position: absolute; top: 0; left: 0; right: 0;
+      height: 26px;
+      background: rgba(0,0,0,0.5);
+      border-bottom: 1px solid rgba(0,255,65,0.1);
+      display: flex; align-items: center; padding: 0 10px; gap: 6px;
+    }
+    .chrome-dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,0.12); }
+    .fake-rows { width: 80%; margin-top: 14px; display: flex; flex-direction: column; gap: 7px; }
+    .fake-row {
+      height: 9px; border-radius: 4px;
+      background: rgba(0,255,65,0.08);
+    }
+    .fake-row.short { width: 60%; }
+    .fake-row.med   { width: 80%; }
+    .fake-row.full  { width: 100%; }
+    .fake-row.accent{ background: rgba(0,255,65,0.18); }
+
+    .card {
+      background: var(--dark2);
+      border: 1px solid rgba(0,255,65,0.12);
+      border-radius: 10px;
+      padding: 24px;
+    }
+    .card.glow {
+      box-shadow: 0 0 30px rgba(0,255,65,0.06), inset 0 1px 0 rgba(0,255,65,0.08);
+    }
+    .card .card-icon { font-size: 28px; margin-bottom: 12px; }
+    .card h4 { font-size: 15px; font-weight: 700; margin-bottom: 8px; }
+    .card p  { font-size: 13px; color: var(--gray2); line-height: 1.55; }
+
+    .stat-block { text-align: center; }
+    .stat-block .stat-num {
+      font-size: 52px; font-weight: 900; color: var(--neon);
+      line-height: 1;
+      font-variant-numeric: tabular-nums;
+      text-shadow: 0 0 30px rgba(0,255,65,0.5);
+    }
+    .stat-block .stat-label {
+      font-size: 12px; color: var(--gray); margin-top: 8px;
+      font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase;
+    }
+
+    .pricing-card {
+      background: var(--dark2);
+      border: 1px solid rgba(0,255,65,0.12);
+      border-radius: 12px;
+      padding: 28px 22px;
+      flex: 1;
+      position: relative;
+      display: flex; flex-direction: column; gap: 4px;
+    }
+    .pricing-card.featured {
+      border-color: var(--neon);
+      box-shadow: 0 0 0 1px rgba(0,255,65,0.3), 0 0 40px rgba(0,255,65,0.1);
+    }
+    .pricing-card .featured-badge {
+      position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
+      background: var(--neon); color: var(--black);
+      font-size: 10px; font-weight: 800; letter-spacing: 0.1em;
+      padding: 3px 12px; border-radius: 100px; text-transform: uppercase;
+    }
+    .pricing-card .tier { font-size: 11px; font-weight: 700; letter-spacing: 0.12em; color: var(--neon); text-transform: uppercase; margin-bottom: 10px; }
+    .pricing-card .price-num { font-size: 38px; font-weight: 900; color: var(--white); line-height: 1; }
+    .pricing-card .price-period { font-size: 12px; color: var(--gray); }
+    .pricing-card .divider { height: 1px; background: rgba(255,255,255,0.06); margin: 14px 0; }
+    .pricing-card ul { list-style: none; display: flex; flex-direction: column; gap: 9px; }
+    .pricing-card ul li { font-size: 12px; color: var(--gray2); display: flex; align-items: flex-start; gap: 8px; }
+    .pricing-card ul li::before { content: '✓'; color: var(--neon); font-weight: 700; flex-shrink: 0; margin-top: 1px; }
+
+    .alert-row {
+      display: flex; align-items: center; gap: 14px;
+      padding: 10px 14px;
+      background: var(--dark2);
+      border: 1px solid rgba(0,255,65,0.1);
+      border-left: 3px solid var(--neon);
+      border-radius: 6px;
+    }
+    .alert-row.critical { border-left-color: #ff3b3b; }
+    .alert-row.warning  { border-left-color: #ffaa00; }
+    .alert-row.info     { border-left-color: #00c8ff; }
+    .alert-row .sev-dot {
+      width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0;
+    }
+    .sev-dot.c { background: #ff3b3b; box-shadow: 0 0 8px #ff3b3b; }
+    .sev-dot.w { background: #ffaa00; box-shadow: 0 0 8px #ffaa00; }
+    .sev-dot.i { background: #00c8ff; box-shadow: 0 0 8px #00c8ff; }
+    .sev-dot.s { background: var(--neon); box-shadow: 0 0 8px var(--neon); }
+    .alert-row .alert-msg { font-size: 13px; color: var(--white); flex: 1; }
+    .alert-row .alert-meta { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--gray); white-space: nowrap; }
+
+    .progress-bar {
+      height: 6px; border-radius: 3px;
+      background: rgba(0,255,65,0.1);
+      overflow: hidden;
+    }
+    .progress-bar .fill {
+      height: 100%; border-radius: 3px;
+      background: linear-gradient(90deg, var(--neon-dim), var(--neon));
+      box-shadow: 0 0 8px var(--neon);
+    }
+
+    .btn-neon {
+      display: inline-flex; align-items: center; gap: 10px;
+      padding: 14px 32px;
+      background: var(--neon);
+      color: var(--black);
+      font-weight: 800; font-size: 15px; letter-spacing: 0.04em;
+      border-radius: 6px;
+      text-decoration: none;
+      box-shadow: 0 0 30px rgba(0,255,65,0.4), 0 0 60px rgba(0,255,65,0.15);
+      transition: all 0.2s;
+    }
+    .btn-outline {
+      display: inline-flex; align-items: center; gap: 10px;
+      padding: 14px 32px;
+      border: 1px solid rgba(0,255,65,0.5);
+      color: var(--neon);
+      font-weight: 700; font-size: 15px; letter-spacing: 0.04em;
+      border-radius: 6px;
+      text-decoration: none;
+      background: transparent;
+    }
+
+    .top-bar {
+      height: 3px; width: 100%;
+      background: linear-gradient(90deg, transparent, var(--neon), transparent);
+      flex-shrink: 0;
+    }
+
+    .left-accent {
+      position: absolute; left: 0; top: 0; bottom: 0;
+      width: 3px;
+      background: linear-gradient(to bottom, transparent, var(--neon) 30%, var(--neon) 70%, transparent);
+      z-index: 2;
+    }
+
+    .slide-body { position: relative; z-index: 2; flex: 1; display: flex; flex-direction: column; }
+    .cols { display: flex; gap: 0; flex: 1; }
+    .col { display: flex; flex-direction: column; }
+
+    .pad-lg { padding: 56px 64px; }
+    .pad-md { padding: 44px 56px; }
+    .pad-sm { padding: 36px 48px; }
+
+    #s01 { background: radial-gradient(ellipse at 70% 40%, #0b2447 0%, #050d14 60%); }
+    #s01 .logo-mark {
+      display: flex; align-items: center; gap: 14px; margin-bottom: 48px;
+    }
+    #s01 .logo-hex {
+      width: 52px; height: 52px;
+      background: var(--neon);
+      clip-path: polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--black); font-weight: 900; font-size: 20px;
+      flex-shrink: 0;
+    }
+    #s01 .logo-text {
+      font-size: 22px; font-weight: 800; letter-spacing: 0.04em; color: var(--white);
+    }
+    #s01 .logo-text span { color: var(--neon); }
+    #s01 .tagline {
+      font-size: 20px; font-weight: 400; color: var(--gray2); margin-top: 22px;
+      max-width: 540px;
+    }
+    #s01 .cover-meta {
+      display: flex; gap: 32px; margin-top: 56px;
+    }
+    #s01 .cover-meta .meta-item { display: flex; flex-direction: column; gap: 4px; }
+    #s01 .cover-meta .meta-label { font-size: 10px; color: var(--gray); font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; }
+    #s01 .cover-meta .meta-val { font-size: 14px; color: var(--white); font-weight: 600; }
+
+    #s01 .cover-right {
+      flex: 1; display: flex; align-items: center; justify-content: center;
+      position: relative;
+    }
+    .hex-grid {
+      position: relative; width: 360px; height: 380px;
+    }
+    .hex-cell {
+      position: absolute;
+      clip-path: polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px;
+    }
+
+    #s02 { background: var(--dark); }
+    .problem-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 28px; flex: 1; }
+    .problem-card {
+      background: #0a1628;
+      border: 1px solid rgba(255,59,59,0.15);
+      border-left: 3px solid #ff3b3b;
+      border-radius: 8px;
+      padding: 20px;
+    }
+    .problem-card .p-icon { font-size: 26px; margin-bottom: 10px; }
+    .problem-card h4 { font-size: 15px; font-weight: 700; margin-bottom: 8px; color: var(--white); }
+    .problem-card p  { font-size: 13px; color: var(--gray2); line-height: 1.55; }
+    .problem-card .stat-pill {
+      display: inline-block; margin-top: 10px;
+      padding: 3px 10px;
+      border-radius: 100px;
+      background: rgba(255,59,59,0.1);
+      border: 1px solid rgba(255,59,59,0.3);
+      font-size: 11px; font-weight: 700; color: #ff6b6b;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    #s03 { background: radial-gradient(ellipse at 20% 60%, rgba(0,100,50,0.08) 0%, transparent 60%), var(--dark); }
+    .solution-flow {
+      display: flex; align-items: center; justify-content: center;
+      gap: 0; margin-top: 32px; flex: 1;
+    }
+    .flow-step {
+      display: flex; flex-direction: column; align-items: center; gap: 12px;
+      flex: 1;
+    }
+    .flow-icon-wrap {
+      width: 72px; height: 72px; border-radius: 50%;
+      background: var(--dark2);
+      border: 2px solid rgba(0,255,65,0.25);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 28px;
+      position: relative;
+    }
+    .flow-icon-wrap::after {
+      content: '';
+      position: absolute; inset: -6px;
+      border-radius: 50%;
+      border: 1px solid rgba(0,255,65,0.08);
+    }
+    .flow-label { font-size: 13px; font-weight: 700; color: var(--white); text-align: center; }
+    .flow-sub   { font-size: 11px; color: var(--gray); text-align: center; max-width: 100px; line-height: 1.4; }
+    .flow-arrow { font-size: 20px; color: rgba(0,255,65,0.4); flex-shrink: 0; padding: 0 4px; margin-top: -28px; }
+
+    #s04 { background: var(--dark); }
+    .honeypot-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 28px; flex: 1; }
+    .hp-card {
+      background: var(--dark2);
+      border: 1px solid rgba(0,255,65,0.1);
+      border-radius: 10px;
+      padding: 20px;
+      display: flex; flex-direction: column; gap: 8px;
+      position: relative; overflow: hidden;
+    }
+    .hp-card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, var(--neon), transparent);
+    }
+    .hp-card .hp-icon { font-size: 30px; }
+    .hp-card .hp-name { font-size: 15px; font-weight: 700; color: var(--white); }
+    .hp-card .hp-desc { font-size: 12px; color: var(--gray2); line-height: 1.5; }
+    .hp-card .hp-tag {
+      margin-top: auto;
+      display: flex; gap: 6px; flex-wrap: wrap;
+    }
+    .hp-tag-item {
+      font-size: 10px; padding: 2px 8px; border-radius: 4px;
+      background: rgba(0,255,65,0.08); color: var(--neon);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    #s05 { background: var(--dark); }
+    .dash-kpi-row { display: flex; gap: 14px; margin-top: 24px; }
+    .kpi-card {
+      flex: 1;
+      background: var(--dark2);
+      border: 1px solid rgba(0,255,65,0.1);
+      border-radius: 8px;
+      padding: 16px;
+    }
+    .kpi-card .kpi-label { font-size: 10px; color: var(--gray); font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 6px; }
+    .kpi-card .kpi-val { font-size: 30px; font-weight: 900; color: var(--neon); font-variant-numeric: tabular-nums; line-height: 1; }
+    .kpi-card .kpi-sub { font-size: 11px; color: var(--gray); margin-top: 4px; }
+    .kpi-card .kpi-trend { font-size: 11px; color: #00cc33; margin-top: 2px; font-weight: 600; }
+
+    .dash-body { display: flex; gap: 14px; margin-top: 14px; flex: 1; }
+    .dash-main { flex: 2; display: flex; flex-direction: column; gap: 14px; }
+    .dash-side  { flex: 1; display: flex; flex-direction: column; gap: 14px; }
+
+    #s06 { background: var(--dark); }
+    .alerts-layout { display: flex; gap: 28px; flex: 1; margin-top: 24px; }
+    .alerts-list { flex: 1; display: flex; flex-direction: column; gap: 10px; }
+    .alerts-detail { flex: 1; display: flex; flex-direction: column; gap: 14px; }
+    .alert-detail-card {
+      background: var(--dark2);
+      border: 1px solid rgba(255,59,59,0.2);
+      border-radius: 10px;
+      padding: 20px;
+      flex: 1;
+    }
+    .alert-detail-card h4 { font-size: 14px; font-weight: 700; color: var(--white); margin-bottom: 10px; }
+    .detail-row { display: flex; justify-content: space-between; align-items: center; padding: 7px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+    .detail-row:last-child { border-bottom: none; }
+    .detail-row .d-label { font-size: 11px; color: var(--gray); }
+    .detail-row .d-val { font-size: 12px; color: var(--white); font-weight: 600; font-family: 'JetBrains Mono', monospace; }
+    .d-val.red  { color: #ff6b6b; }
+    .d-val.grn  { color: var(--neon); }
+    .d-val.ylw  { color: #ffaa00; }
+
+    #s07 { background: radial-gradient(ellipse at 50% 100%, rgba(0,50,100,0.2) 0%, transparent 60%), var(--dark); }
+    .pricing-row { display: flex; gap: 16px; margin-top: 28px; align-items: flex-start; flex: 1; }
+
+    #s08 { background: var(--dark); }
+    .roi-layout { display: flex; gap: 28px; flex: 1; margin-top: 28px; }
+    .roi-left { flex: 1; display: flex; flex-direction: column; gap: 16px; }
+    .roi-right { flex: 1; display: flex; flex-direction: column; gap: 14px; }
+    .roi-bar-item { display: flex; flex-direction: column; gap: 6px; }
+    .roi-bar-item .rb-label { display: flex; justify-content: space-between; font-size: 13px; font-weight: 600; }
+    .roi-bar-item .rb-val { color: var(--neon); font-family: 'JetBrains Mono', monospace; }
+
+    #s09 { background: var(--dark); }
+    .why-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 24px; flex: 1; }
+    .why-card {
+      background: var(--dark2);
+      border: 1px solid rgba(0,255,65,0.1);
+      border-radius: 10px;
+      padding: 22px;
+      display: flex; gap: 16px; align-items: flex-start;
+    }
+    .why-card .why-num {
+      font-size: 36px; font-weight: 900; color: rgba(0,255,65,0.15);
+      line-height: 1; flex-shrink: 0; font-variant-numeric: tabular-nums;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .why-card .why-body h4 { font-size: 15px; font-weight: 700; margin-bottom: 6px; }
+    .why-card .why-body p  { font-size: 12px; color: var(--gray2); line-height: 1.55; }
+    .why-card .why-icon { font-size: 20px; margin-bottom: 8px; }
+
+    #s10 { background: radial-gradient(ellipse at 50% 50%, #0b2447 0%, #050d14 70%); }
+    #s10 .cta-center {
+      flex: 1; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; text-align: center;
+      position: relative; z-index: 2; padding: 0 120px;
+    }
+    #s10 h2 { font-size: 48px; font-weight: 900; line-height: 1.1; }
+    #s10 h2 span { color: var(--neon); }
+    #s10 p { font-size: 17px; color: var(--gray2); margin-top: 18px; max-width: 500px; line-height: 1.6; }
+    .cta-buttons { display: flex; gap: 16px; margin-top: 40px; justify-content: center; }
+    .contact-row { display: flex; gap: 40px; margin-top: 44px; justify-content: center; }
+    .contact-item { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--gray2); }
+    .contact-item .ico { color: var(--neon); }
+
+    .scanlines {
+      position: absolute; inset: 0; z-index: 1; pointer-events: none;
+      background: repeating-linear-gradient(
+        to bottom,
+        transparent 0px,
+        transparent 3px,
+        rgba(0,0,0,0.04) 3px,
+        rgba(0,0,0,0.04) 4px
+      );
+    }
+
+    @media print {
+      body { background: #000; }
+      .deck { padding: 0; gap: 0; }
+      .slide {
+        width: 297mm; height: 167mm;
+        page-break-after: always;
+        border-radius: 0;
+        border: none;
+      }
+      @page { size: A4 landscape; margin: 0; }
+    }
+
+    @media (max-width: 1300px) {
+      :root { --slide-w: 100%; --slide-h: auto; }
+      .slide { height: auto; min-height: 56vw; }
+      h1.main-title { font-size: 52px; }
+    }
+  </style>
+</head>
+<body>
+<div class="deck">
+
+  <div class="slide" id="s01" data-n="01">
+    <div class="top-bar"></div>
+    <div class="grid-bg"></div>
+    <div class="diag-line"></div>
+    <div class="scanlines"></div>
+    <div class="slide-body cols">
+      <div class="col pad-lg" style="flex:1.1; justify-content:center;">
+        <div id="s01" class="logo-mark">
+          <div class="logo-hex">S</div>
+          <div class="logo-text"><span>Sarab</span> Security</div>
+        </div>
+        <div class="pill eyebrow"><span class="dot"></span> Deception-Based Threat Detection</div>
+        <h1 class="main-title" style="margin-top:20px;">
+          Detect<br/>Attackers<br/><span class="accent">Before They<br/>Strike.</span>
+        </h1>
+        <p class="tagline">Enterprise honeypot infrastructure that lures, traps, and fingerprints adversaries in real time.</p>
+        <div class="cover-meta">
+          <div class="meta-item"><span class="meta-label">Version</span><span class="meta-val">2.4.1</span></div>
+          <div class="meta-item"><span class="meta-label">Category</span><span class="meta-val">Cyber Defense</span></div>
+          <div class="meta-item"><span class="meta-label">Year</span><span class="meta-val">2026</span></div>
+        </div>
+      </div>
+      <div class="col" style="flex:1; align-items:center; justify-content:center; position:relative;">
+        <div class="hex-grid">
+          <div class="hex-cell" style="width:90px;height:90px;top:60px;left:130px;background:rgba(0,255,65,0.12);border:2px solid rgba(0,255,65,0.35);">🍯</div>
+          <div class="hex-cell" style="width:70px;height:70px;top:10px;left:60px;background:rgba(0,255,65,0.07);border:1px solid rgba(0,255,65,0.2);">🌐</div>
+          <div class="hex-cell" style="width:70px;height:70px;top:10px;left:210px;background:rgba(0,255,65,0.07);border:1px solid rgba(0,255,65,0.2);">🖥️</div>
+          <div class="hex-cell" style="width:70px;height:70px;top:140px;left:40px;background:rgba(0,255,65,0.07);border:1px solid rgba(0,255,65,0.2);">🔐</div>
+          <div class="hex-cell" style="width:70px;height:70px;top:140px;left:230px;background:rgba(0,255,65,0.07);border:1px solid rgba(0,255,65,0.2);">📡</div>
+          <div class="hex-cell" style="width:70px;height:70px;top:240px;left:80px;background:rgba(0,255,65,0.07);border:1px solid rgba(0,255,65,0.2);">🛡️</div>
+          <div class="hex-cell" style="width:70px;height:70px;top:240px;left:200px;background:rgba(0,255,65,0.07);border:1px solid rgba(0,255,65,0.2);">⚡</div>
+          <svg style="position:absolute;inset:0;width:100%;height:100%;overflow:visible;" viewBox="0 0 360 380">
+            <line x1="175" y1="105" x2="95"  y2="45"  stroke="rgba(0,255,65,0.15)" stroke-width="1"/>
+            <line x1="175" y1="105" x2="245" y2="45"  stroke="rgba(0,255,65,0.15)" stroke-width="1"/>
+            <line x1="175" y1="105" x2="75"  y2="175" stroke="rgba(0,255,65,0.15)" stroke-width="1"/>
+            <line x1="175" y1="105" x2="265" y2="175" stroke="rgba(0,255,65,0.15)" stroke-width="1"/>
+            <line x1="75"  y1="175" x2="115" y2="275" stroke="rgba(0,255,65,0.1)"  stroke-width="1"/>
+            <line x1="265" y1="175" x2="235" y2="275" stroke="rgba(0,255,65,0.1)"  stroke-width="1"/>
+          </svg>
+        </div>
+        <div style="position:absolute;bottom:80px;right:40px;background:rgba(0,255,65,0.06);border:1px solid rgba(0,255,65,0.2);border-radius:8px;padding:14px 18px;text-align:right;">
+          <div style="font-size:28px;font-weight:900;color:var(--neon);text-shadow:0 0 20px rgba(0,255,65,0.5);">99.3%</div>
+          <div style="font-size:11px;color:var(--gray);margin-top:4px;letter-spacing:0.06em;">Detection Rate</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="slide" id="s02" data-n="02">
+    <div class="top-bar"></div>
+    <div class="grid-bg"></div>
+    <div class="left-accent"></div>
+    <div class="slide-body pad-md" style="flex:1;display:flex;flex-direction:column;">
+      <div class="label eyebrow">The Problem</div>
+      <h2 class="slide-title">Traditional Security Is<br/><span class="accent">Flying Blind.</span></h2>
+      <hr class="neon-hr" style="width:48px;margin:0 0 16px;"/>
+      <div class="problem-grid">
+        <div class="problem-card">
+          <div class="p-icon">🕵️</div>
+          <h4>Attackers Dwell Undetected</h4>
+          <p>Adversaries move laterally inside networks for months before discovery, exfiltrating sensitive data unnoticed.</p>
+          <div class="stat-pill">⌀ 204 days dwell time</div>
+        </div>
+        <div class="problem-card">
+          <div class="p-icon">🚨</div>
+          <h4>Alert Fatigue is Epidemic</h4>
+          <p>SOC analysts wade through thousands of false positives daily, burying the signals that actually matter.</p>
+          <div class="stat-pill">~1,200 alerts / day</div>
+        </div>
+        <div class="problem-card">
+          <div class="p-icon">💸</div>
+          <h4>Breach Costs Are Skyrocketing</h4>
+          <p>The average data breach now costs $4.88M — with regulatory fines, reputational damage, and remediation.</p>
+          <div class="stat-pill">$4.88M avg breach cost</div>
+        </div>
+        <div class="problem-card">
+          <div class="p-icon">🔓</div>
+          <h4>Perimeter Defense Is Obsolete</h4>
+          <p>Cloud-first, remote-work environments dissolve the traditional perimeter. Firewalls can't protect what they can't see.</p>
+          <div class="stat-pill">82% attacks use stolen creds</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="slide" id="s10" data-n="10">
+    <div class="top-bar"></div>
+    <div class="grid-bg"></div>
+    <div class="diag-line"></div>
+    <div class="diag-line" style="left:18%;right:auto;"></div>
+    <div class="scanlines"></div>
+    <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:500px;height:500px;border-radius:50%;background:radial-gradient(circle,rgba(0,255,65,0.06) 0%,transparent 70%);z-index:1;pointer-events:none;"></div>
+    <div class="slide-body" style="flex:1;position:relative;z-index:2;">
+      <div id="s10" class="cta-center">
+        <div class="pill" style="margin-bottom:28px;"><span class="dot"></span> Ready to Deploy</div>
+        <h2>Stop Hunting Ghosts.<br/>Start <span>Catching Attackers.</span></h2>
+        <p>Join 500+ security teams using Sarab to catch threats the moment they step inside. No noise, no guesswork — just certainty.</p>
+        <div class="cta-buttons">
+          <a href="#" class="btn-neon">🚀 Start Free Trial</a>
+          <a href="#" class="btn-outline">📅 Book a Demo</a>
+        </div>
+        <div class="contact-row">
+          <div class="contact-item"><span class="ico">🌐</span> Sarab-Deception</div>
+          <div class="contact-item"><span class="ico">📧</span> mohamed1332006badra@gmail.com</div>
+          <div class="contact-item"><span class="ico">📞</span> 01016731179</div>
+          <div class="contact-item"><span class="ico">💬</span> Live Chat Available</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

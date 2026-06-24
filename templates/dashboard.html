@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html dir="rtl">
+<head>
+    <title>لوحة تحكم سراب</title>
+    <style>
+        body { background: #0a0e17; color: #0f0; font-family: monospace; padding: 20px; }
+        .card { border: 1px solid #0f0; padding: 10px; margin: 10px; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { border: 1px solid #0f0; padding: 8px; text-align: right; }
+    </style>
+</head>
+<body>
+    <h1>🕷️ نظام سراب - لوحة التحكم</h1>
+    <div id="stats"></div>
+    <table>
+        <thead><tr><th>الوقت</th><th>المصدر</th><th>النور</th><th>الخطورة</th></tr></thead>
+        <tbody id="attacks"></tbody>
+    </table>
+    <script>
+        async function load() {
+            const res = await fetch('/api/attacks');
+            const json = await res.json();
+            const body = document.getElementById('attacks');
+            body.innerHTML = json.data.reverse().map(a => `<tr><td>${a.timestamp}</td><td>${a.source_ip}</td><td>${a.type}</td><td>${a.severity}</td></tr>`).join('');
+        }
+        setInterval(load, 5000);
+        load();
+    </script>
+<div class="card" style="margin-top:20px;"><h3>🌍 خريطة الهجمات العالمية</h3><div id="map" style="height:400px;background:rgba(0,255,65,0.05);border-radius:8px;"></div></div><link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" /><script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script><script>setTimeout(() => { const map = L.map("map").setView([30.0444, 31.2357], 2); L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png").addTo(map); }, 1000);</script>
+</body>
+</html>
